@@ -5,20 +5,19 @@ class Config(config: String) {
     private val backingConfig: Map<String, String>
 
     init {
-        val parsedMap: MutableMap<String, String> = HashMap()
+        val parsedMap = mutableMapOf<String, String>()
         requireNotNull(getResource(config)) { "Unable to retrieve config" }
-            .bufferedReader().use {
-                it.forEachLine {
-                    val line = it.split('=').map { it.trim() }
-                    require(line.size == 2) { "Invalid config syntax" }
-                    parsedMap[line[0]] = line[1]
-                }
+            .bufferedReader().forEachLine {
+                val line = it.split('=').map { it.trim() }
+                require(line.size == 2) { "Invalid config syntax" }
+                parsedMap[line[0]] = line[1]
             }
-        backingConfig = parsedMap.toMap()
+        backingConfig = parsedMap
     }
 
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadOnlyProperty<Any?, *> {
         require(backingConfig.containsKey(property.name)) { "Invalid key!" }
-        return ReadOnlyProperty { _, prop -> backingConfig[prop.name]!! }
+        val cachedVal = backingConfig.getValue(property.name)
+        return ReadOnlyProperty { _, _ -> cachedVal }
     }
 }

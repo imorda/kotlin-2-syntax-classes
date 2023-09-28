@@ -20,6 +20,6 @@ class IntMatrix(val rows: Int, val columns: Int) {
     }
 
     private fun validate(i: Int, j: Int) {
-        require(i >= 0 && j >= 0 && i < rows && j < columns) { "Invalid index value given" }
+        require(i in 0..<rows && j in 0..<columns) { "Invalid index value given" }
     }
 }

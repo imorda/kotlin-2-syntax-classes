@@ -1,46 +1,21 @@
 sealed interface IntResult {
-    fun getOrDefault(default: Int): Int
-    fun getOrNull(): Int?
-    fun getStrict(): Int
-
-
-    class Ok(val value: Int) : IntResult {
-        override fun getOrDefault(default: Int): Int = value
-        override fun getOrNull(): Int = value
-
-        override fun getStrict(): Int = value
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Ok
-
-            return value == other.value
-        }
-
-        override fun hashCode(): Int {
-            return value
-        }
+    fun getOrDefault(default: Int): Int = when (this) {
+        is Ok -> value
+        is Error -> default
     }
 
-    class Error(val reason: String) : IntResult {
-        override fun getOrDefault(default: Int): Int = default
-        override fun getOrNull(): Int? = null
-
-        override fun getStrict(): Int = throw NoResultProvided(reason)
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Error
-
-            return reason == other.reason
-        }
-
-        override fun hashCode(): Int {
-            return reason.hashCode()
-        }
+    fun getOrNull(): Int? = when (this) {
+        is Ok -> value
+        is Error -> null
     }
+
+    fun getStrict(): Int = when (this) {
+        is Ok -> value
+        is Error -> throw NoResultProvided(reason)
+    }
+
+    data class Ok(val value: Int) : IntResult
+    data class Error(val reason: String) : IntResult
 }
 
 class NoResultProvided(message: String) : NoSuchElementException(message)
